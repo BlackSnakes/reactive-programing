@@ -9,15 +9,15 @@ Reactor 라이브러리를 사용하여 필요한 사항을 설명합니다. 코
 
 To get started grab a blank project from https://start.spring.io and add the Reactor Core dependency. With Maven
 ```
-		<dependency>
-			<groupId>io.projectreactor</groupId>
-			<artifactId>reactor-core</artifactId>
-			<version>3.0.0.RC2</version>
-		</dependency>
+<dependency>
+	<groupId>io.projectreactor</groupId>
+	<artifactId>reactor-core</artifactId>
+	<version>3.0.0.RC2</version>
+</dependency>
 ```    
 Gradle을 사용하면 매우 유사합니다.:
 ```
-    compile 'io.projectreactor:reactor-core:3.0.0.RC2'
+compile 'io.projectreactor:reactor-core:3.0.0.RC2'
 ```    
 이제 코드를 작성해 보겠습니다.
 
@@ -30,7 +30,7 @@ Reactor는 샘플에서 사용할 라이브러리이므로 여기 표기법을 �
 ## Generators
 
 Flux는 특정 POJO 유형의 이벤트 시퀀스를 발행하는 게시자이므로 일반적인 것입니다. 즉, Flux <T>는 T의 게시자입니다. Flux는 다양한 출처에서 자체의 인스턴스를 만들 수있는 정적 인 편리한 메소드를 가지고 있습니다. 예를 들어, 배열에서 Flux를 만들려면:
-```
+```java
 Flux<String> flux = Flux.just("red", "white", "blue");
 ```
 우리는 방금 Flux를 만들었고, 이제 우리는 그것을 가지고 할 수 있습니다. 실제로는 두 가지 작업 만 수행 할 수 있습니다 : 변환 (변환 또는 다른 시퀀스와 결합), 구독 (게시자).
@@ -45,7 +45,7 @@ Flux<String> flux = Flux.just("red", "white", "blue");
 Flux에는 많은 메소드가 있으며 거의 모든 메소드가 연산자입니다. Javadocs와 같이 더 나은 곳을 찾을 수 있기 때문에 여기서 모든 것을 보지 않을 것입니다. 우리는 운영자가 무엇인지, 그리고 그것이 당신을 위해 무엇을 할 수 있는지에 대한 풍미를 얻을 필요가 있습니다.
 
 예를 들어 Flux 내부의 내부 이벤트를 표준 출력에 기록하려면 .log () 메소드를 호출 할 수 있습니다. 또는 map ()을 사용하여 변형 할 수 있습니다.:
-```
+```java
 Flux<String> flux = Flux.just("red", "white", "blue");
 
 Flux<String> upper = flux
@@ -57,7 +57,7 @@ Flux<String> upper = flux
 이 작은 샘플에 대해 흥미로운 점은 마음이 부는 것, 심지어 익숙하지 않은 경우에도 데이터가 아직 처리되지 않았다는 것입니다. 말 그대로 아무것도 기록되지 않았기 때문에 아무 것도 기록되지 않았습니다 (시도해보십시오). Flux에서 호출하는 연산자는 나중에 실행할 계획을 세우는 데 그 몫을합니다. 그것은 완전히 선언적이며 사람들이 "기능적"이라고 부르는 이유입니다. 연산자에 구현 된 로직은 데이터가 흐르기 시작할 때만 실행되며 누군가가 Flux (또는 Publisher와 동등한)에 가입 할 때까지는 발생하지 않습니다.
 
 일련의 데이터를 처리하는 것과 동일한 선언적, 기능적 접근 방식이 모든 Reactive 라이브러리와 Java 8 Streams에 존재합니다. Flux와 동일한 내용의 Stream을 사용하여 이와 유사한 코드를 고려하십시오.:
-```
+```java
 Stream<String> stream = Streams.of("red", "white", "blue");
 Stream<String> upper = stream.map(value -> {
     System.out.println(value);
@@ -74,7 +74,7 @@ Flux에 대한 관찰은 여기에 적용됩니다. 데이터가 처리되지 �
 데이터 흐름을 만들려면 subscribe () 메소드 중 하나를 사용하여 Flux에 가입해야합니다. 이러한 메서드 만 데이터 흐름을 만듭니다. 시퀀스에 선언 된 연산자 체인을 통해 다시 도달하고 게시자에게 데이터 작성을 요청합니다. 우리가 함께 작업 한 샘플 샘플에서는 기본 문자열 컬렉션이 반복된다는 것을 의미합니다. 좀 더 복잡한 경우에는 파일 시스템에서 파일을 읽거나 데이터베이스 또는 HTTP 서비스 호출에서 가져 오기를 트리거 할 수 있습니다.
 
 실행중인 subscribe () 호출이 있습니다.:
-```
+```java
 Flux.just("red", "white", "blue")
   .log()
   .map(String::toUpperCase)
@@ -93,7 +93,7 @@ Flux.just("red", "white", "blue")
 따라서 인수없이 subscribe ()의 효과가 게시자에게 모든 데이터를 보내도록 요청하는 것입니다. 하나의 요청 () 만 기록되고 "제한되지 않음"입니다. 또한 게시 된 항목 (onNext ()), 시퀀스 종료 (onComplete ()) 및 원래 구독 (onSubscribe ())에 대한 콜백을 볼 수 있습니다. 필요하다면 Flux에서 doOn * () 메소드를 사용하여 직접 이벤트를 수신 할 수 있습니다.이 메소드는 가입자가 아닌 운영자이기 때문에 자체적으로 데이터가 흐르지 않습니다.
 
 subscribe () 메서드가 오버로드되고 다른 변형을 사용하면 발생하는 상황을 제어하는 다양한 옵션이 제공됩니다. 하나의 중요하고 편리한 형식은 콜백을 인수로 갖는 subscribe ()입니다. 첫 번째 인수는 각 항목에 대해 콜백을 제공하는 Consumer이며, Consumer에 오류가 있으면 추가하고 시퀀스 완료시 실행할 바닐라 Runnable을 선택적으로 추가 할 수도 있습니다. 예를 들어 항목 당 콜백만으로:
-```
+```java
 Flux.just("red", "white", "blue")
     .log()
     .map(String::toUpperCase)
@@ -112,7 +112,7 @@ BLUE
 09:56:12.682 [main] INFO reactor.core.publisher.FluxLog -  onComplete()
 ```
 우리는 데이터의 흐름을 제어하고 다양한 방식으로 "제한적"으로 만들 수 있습니다. 제어를위한 원시 API는 구독자로부터받는 구독입니다. 위의 subscribe ()에 대한 짧은 호출의 동일한 긴 형식은 다음과 같습니다.:
-```
+```java
 .subscribe(new Subscriber<String>() {
 
     @Override
@@ -133,7 +133,7 @@ BLUE
 });
 ```
 흐름을 제어하기 위해. 한 번에 최대 2 개의 항목을 소비하려면 Subscription을보다 지능적으로 사용할 수 있습니다:
-```
+```java
 .subscribe(new Subscriber<String>() {
 
     private long count = 0;
@@ -166,7 +166,7 @@ BLUE
 09:47:13.565 [main] INFO reactor.core.publisher.FluxLog -  onComplete()
 ```
 실제로 일괄 처리 구독자는 Flux에서 이미 사용할 수있는 편리한 방법이있는 일반적인 사용 사례입니다. 위의 일괄 처리 예제는 다음과 같이 구현할 수 있습니다.:
-```
+```java
 Flux.just("red", "white", "blue")
   .log()
   .map(String::toUpperCase)
@@ -191,7 +191,7 @@ Flux.just("red", "white", "blue")
 위의 모든 로그의 흥미로운 특징은 구독자 ()의 호출자 인 스레드가 "주"스레드에 있다는 것입니다. 이것은 중요한 점을 강조합니다. Reactor는 스레드에 대해 매우 검소합니다. 이는 최상의 성능을 발휘할 수있는 가장 큰 기회를 제공하기 때문입니다. 지난 5 년 동안 스레드와 스레드 풀 및 비동기 실행 문제를 해결하고 서비스에서 더 많은 주스를 뽑으려고하면 놀라운 결과 일 수 있습니다. 그러나 사실입니다. 스레드를 전환하는 것이 필수적이지 않으면 JVM이 스레드를 매우 효율적으로 처리하도록 최적화되어 있어도 단일 스레드에서 계산하는 것이 항상 더 빠릅니다. Reactor는 모든 비동기 처리를 제어 할 수있는 키를 사용자에게 제공했으며 사용자가 수행중인 작업을 알고 있다고 가정합니다.
 
 Flux는 스레드 경계를 제어하는 ​​몇 가지 구성 메소드를 제공합니다. 예를 들어, Flux.subscribeOn ()을 사용하여 배경 스레드에서 처리 할 구독을 구성 할 수 있습니다.:
-```
+```java
 Flux.just("red", "white", "blue")
   .log()
   .map(String::toUpperCase)
@@ -211,7 +211,7 @@ Flux.just("red", "white", "blue")
 >Tip
 >이 코드를 직접 작성하거나 복사하여 붙여 넣으면 JVM이 종료되기 전에 처리가 중지 될 때까지 기다려야합니다.
 구독 및 모든 처리는 단일 배경 스레드 "parallel-1-1"에서 발생합니다. 이는 우리가 주요 Flux의 구독자를 배경으로 요청했기 때문입니다. 항목 처리가 CPU 집중적 인 경우 (사실상 백그라운드 스레드에 있다는 것은 의미가 없지만 컨텍스트 스위치에 대해 비용을 지불하지만 결과가 더 빠르기 때문에) 괜찮습니다. I / O를 집중적으로 사용하고 차단하는 항목 처리를 수행 할 수도 있습니다. 이 경우 호출자를 차단하지 않고 최대한 빨리 처리하려고 할 수 있습니다. 스레드 풀은 여전히 ​​당신의 친구이며, Schedulers.parallel ()에서 얻을 수 있습니다. 개별 항목의 처리를 개별 스레드로 전환하려면 (풀의 한도까지) 개별 게시자로 분리해야하며 각 게시자는 결과 스레드를 백그라운드 스레드에서 요청해야합니다. 이 작업을 수행하는 한 가지 방법은 flatMap ()이라는 연산자로 항목을 잠재적으로 다른 유형의 게시자에 매핑 한 다음 새로운 유형의 시퀀스로 다시 매핑하는 것입니다:
-```
+```java
 Flux.just("red", "white", "blue")
   .log()
   .flatMap(value ->
@@ -242,7 +242,7 @@ Flux.just("red", "white", "blue")
 >Tip
 >세 가지 항목 ( "빨간색", "흰색", "파란색")이 너무 적어서 하나 이상의 배경 스레드를 확실하게 볼 수 없으므로 더 많은 데이터를 생성하는 것이 좋습니다. 예를 들어 난수 생성기를 사용하면됩니다.
 Flux에는 publishOn () 메소드도 있지만 구독자 자체 대신에 리스너 (onNext () 또는 소비자 콜백)에 대해 동일합니다.:
-```
+```java
 Flux.just("red", "white", "blue")
   .log()
   .map(String::toUpperCase)

@@ -1,10 +1,11 @@
 # Notes on Reactive Programming Part II: Writing Some Code
 
-In this article we continue the series on Reactive Programming, and we concentrate on explaining some concepts through actual code samples. The end result should be that you understand a bit better what makes Reactive different, and what makes it functional. The examples here are quite abstract, but they give you a way to think about the APIs and the programming style, and start to get a feel for how it is different. We will see the elements of Reactive, and learn how to control the flow of data, and process in background threads if necessary.
+
+이 기사에서는 Reactive Programming에 대한 시리즈를 계속 진행하며 실제 코드 샘플을 통해 몇 가지 개념을 설명하는 데 집중합니다. 최종 결과는 Reactive가 무엇이 다른 것인지, 그리고 Reactive를 기능적으로 만드는 점을 이해하는 것입니다. 여기의 예제는 매우 추상적이지만 API와 프로그래밍 스타일에 대해 생각하고 다른 방식에 대한 느낌을 갖기 시작할 수있는 방법을 제공합니다. Reactive의 요소를보고 데이터 흐름을 제어하고 필요한 경우 백그라운드 스레드에서 처리하는 방법을 배웁니다.
 
 ## Setting Up a Project
 
-We will use the Reactor libraries to illustrate the points we need to make. The code could just as easily be written with other tools. If you want to play with the code and see it working without having to copy-paste anything, there are working samples with tests in Github.
+Reactor 라이브러리를 사용하여 필요한 사항을 설명합니다. 코드는 다른 도구로 쉽게 작성할 수 있습니다. 코드를 가지고 놀고 아무 것도 복사하지 않고 코드를보고 싶다면 Github에서 테스트 한 샘플이 있습니다.
 
 To get started grab a blank project from https://start.spring.io and add the Reactor Core dependency. With Maven
 ```
@@ -14,35 +15,36 @@ To get started grab a blank project from https://start.spring.io and add the Rea
 			<version>3.0.0.RC2</version>
 		</dependency>
 ```    
-With Gradle it’s very similar:
+Gradle을 사용하면 매우 유사합니다.:
 ```
     compile 'io.projectreactor:reactor-core:3.0.0.RC2'
 ```    
-Now let’s write some code.
+이제 코드를 작성해 보겠습니다.
 
 ## What Makes it Functional?
 
-The basic building block of Reactive is a sequence of events, and two protagonists, a publisher and a subscriber to those events. It’s also OK to call a sequence a "stream" because that’s what it is. If we need to, we will use the word "stream" with a small "s", but Java 8 has a java.util.Stream which is different, so try not to get confused. We will try to concentrate the narrative on the publisher and subscriber anyway (that’s what Reactive Streams does).
+Reactive의 기본 구성 요소는 일련의 이벤트와 게시자 및 해당 이벤트 구독자라는 두 가지 주체입니다. 그것이 시퀀스이기 때문에 시퀀스를 "스트림"이라고 부를 수도 있습니다. 필요하다면 "stream"이라는 단어를 작은 "s"와 함께 사용 하겠지만 Java 8에는 다른 java.util.Stream이 있으므로 혼동하지 않도록하십시오. 어쨌든 게시자와 구독자에게 서사를 집중하려고합니다 (즉 리 액티브 스트림이하는 것입니다).
 
-Reactor is the library we are going to use in samples, so we’ll stick to the notation there, and call the publisher a Flux (it implements the interface Publisher from Reactive Streams). The RxJava library is very similar and has a lot of parallel features, so in that case we would be talking about an Observable instead, but the code would be very similar. (Reactor 2.0 called it a Stream which is confusing if we need to talk about Java 8 Streams as well, so we’ll only use the new code in Reactor 3.0.)
+Reactor는 샘플에서 사용할 라이브러리이므로 여기 표기법을 고수하고 게시자를 Flux (Reactive Streams의 인터페이스 Publisher를 구현 함)라고 부릅니다. RxJava 라이브러리는 매우 유사하고 많은 병렬 기능을 가지고 있으므로이 경우 Observable에 대해 대신 설명 하겠지만 코드는 매우 유사합니다. (Reactor 2.0은 Stream이라고 불렀고, Java 8 Streams에 관해서도 혼란스러워하기 때문에 Reactor 3.0에서만 새로운 코드를 사용합니다.)
 
 ## Generators
 
-A Flux is a publisher of a sequence of events of a specific POJO type, so it is generic, i.e. Flux<T> is a publisher of T. Flux has some static convenience methods to create instances of itself from a variety of sources. For example, to create a Flux from an array:
+Flux는 특정 POJO 유형의 이벤트 시퀀스를 발행하는 게시자이므로 일반적인 것입니다. 즉, Flux <T>는 T의 게시자입니다. Flux는 다양한 출처에서 자체의 인스턴스를 만들 수있는 정적 인 편리한 메소드를 가지고 있습니다. 예를 들어, 배열에서 Flux를 만들려면:
 ```
 Flux<String> flux = Flux.just("red", "white", "blue");
 ```
-We just generated a Flux, and now we can do stuff with it. There are actually only two things you can do with it: operate on it (transform it, or combine it with other sequences), subscribe to it (it’s a publisher).
+우리는 방금 Flux를 만들었고, 이제 우리는 그것을 가지고 할 수 있습니다. 실제로는 두 가지 작업 만 수행 할 수 있습니다 : 변환 (변환 또는 다른 시퀀스와 결합), 구독 (게시자).
 
 ## Single Valued Sequences
 
-Often you encounter a sequence that you know has only one or zero elements, for example a repository method that finds an entity by its id. Reactor has a Mono type representing a single valued or empty Flux. Mono has a very similar API to Flux but more focused because not all operators make sense for single-valued sequences. RxJava also has a bolt on (in version 1.x) called Single, and also Completable for an empty sequence. The empty sequence in Reactor is Mono<Void>.
+종종 하나 또는 0 개의 요소 만있는 시퀀스를 발견하게됩니다. 예를 들어 ID로 엔티티를 찾는 저장소 메소드가 있습니다. Reactor에는 단일 값 또는 빈 Flux를 나타내는 Mono 유형이 있습니다. Mono는 Flux와 매우 유사한 API를 가지고 있지만 모든 연산자가 단일 값 시퀀스에 대해 이해할 수있는 것은 아니기 때문에 더욱 집중적입니다. 또한 RxJava에는 Single이라고하는 볼트 (버전 1.x)가 있고 빈 시퀀스에는 Completable도 있습니다. Reactor의 빈 시퀀스는 Mono <Void>입니다.
 
 ## Operators
 
-There are a lot of methods on a Flux and nearly all of them are operators. We aren’t going to look at them all here because there are better places to look for that (like the Javadocs). We only need to get a flavour for what an operator is, and what it can do for you.
 
-For instance, to ask for the internal events inside a Flux to be logged to standard out, you can call the .log() method. Or you can transform it using a map():
+Flux에는 많은 메소드가 있으며 거의 모든 메소드가 연산자입니다. Javadocs와 같이 더 나은 곳을 찾을 수 있기 때문에 여기서 모든 것을 보지 않을 것입니다. 우리는 운영자가 무엇인지, 그리고 그것이 당신을 위해 무엇을 할 수 있는지에 대한 풍미를 얻을 필요가 있습니다.
+
+예를 들어 Flux 내부의 내부 이벤트를 표준 출력에 기록하려면 .log () 메소드를 호출 할 수 있습니다. 또는 map ()을 사용하여 변형 할 수 있습니다.:
 ```
 Flux<String> flux = Flux.just("red", "white", "blue");
 
@@ -50,11 +52,11 @@ Flux<String> upper = flux
   .log()
   .map(String::toUpperCase);
 ```  
-In this code we transformed the strings in the input by converting them to upper case. So far, so trivial.
+이 코드에서는 입력에서 문자열을 대문자로 변환하여 문자열을 변환했습니다. 지금까지 그렇게 사소한.
 
-What’s interesting about this little sample — mind blowing, even, if you’re not used to it — is that no data have been processed yet. Nothing has even been logged because literally, nothing happened (try it and you will see). Calling operators on a Flux amounts to building a plan of execution for later. It is completely declarative, and it’s why people call it "functional". The logic implemented in the operators is only executed when data starts to flow, and that doesn’t happen until someone subscribes to the Flux (or equivalently to the Publisher).
+이 작은 샘플에 대해 흥미로운 점은 마음이 부는 것, 심지어 익숙하지 않은 경우에도 데이터가 아직 처리되지 않았다는 것입니다. 말 그대로 아무것도 기록되지 않았기 때문에 아무 것도 기록되지 않았습니다 (시도해보십시오). Flux에서 호출하는 연산자는 나중에 실행할 계획을 세우는 데 그 몫을합니다. 그것은 완전히 선언적이며 사람들이 "기능적"이라고 부르는 이유입니다. 연산자에 구현 된 로직은 데이터가 흐르기 시작할 때만 실행되며 누군가가 Flux (또는 Publisher와 동등한)에 가입 할 때까지는 발생하지 않습니다.
 
-The same declarative, functional approach to processing a sequence of data exists in all Reactive libraries, and also in Java 8 Streams. Consider this, similar looking code, using a Stream with the same contents as the Flux:
+일련의 데이터를 처리하는 것과 동일한 선언적, 기능적 접근 방식이 모든 Reactive 라이브러리와 Java 8 Streams에 존재합니다. Flux와 동일한 내용의 Stream을 사용하여 이와 유사한 코드를 고려하십시오.:
 ```
 Stream<String> stream = Streams.of("red", "white", "blue");
 Stream<String> upper = stream.map(value -> {
@@ -62,23 +64,23 @@ Stream<String> upper = stream.map(value -> {
     return value.toUpperCase();
 });
 ```
-The observation we made about Flux applies here: no data is processed, it’s just a plan of execution. There are, however, some important differences between Flux and Stream, which make Stream an inappropriate API for Reactive use cases. Flux has a lot more operators, much of which is just convenience, but the real difference comes when you want to consume the data, so that’s what we need to look at next.
+Flux에 대한 관찰은 여기에 적용됩니다. 데이터가 처리되지 않고 실행 계획에 불과합니다. 그러나 Flux와 Stream 간에는 몇 가지 중요한 차이점이 있습니다. 이로 인해 Stream이 Reactive 사용 사례의 부적절한 API가됩니다. Flux에는 훨씬 더 많은 연산자가 있으며 그 중 대다수는 편의성을 제공하지만 실제 차이점은 데이터를 소비하려는 경우에 발생하므로 다음에 살펴볼 필요가 있습니다.
 
 >Tip
->There is a useful blog by Sebastien Deleuze on Reactive Types, where he describes the differences between the various streaming and reactive APIs by looking at the types they define, and how you would use them. The differences between Flux and Stream are highlighted there in more detail.
+>Reactive Types에는 Sebastien Deleuze가 작성한 유용한 블로그가 있습니다. 여기에서 다양한 스트리밍 API와 반응 API의 차이점은 정의하는 유형과 사용 방법을 살펴 보는 것입니다. Flux와 Stream의 차이점이 더 자세히 설명되어 있습니다.
 
 ## Subscribers
 
-To make the data flow you have to subscribe to the Flux using one of the subscribe() methods. Only those methods make the data flow. They reach back through the chain of operators you declared on your sequence (if any) and request the publisher to start creating data. In the sample samples we have been working with, this means the underlying collection of strings is iterated. In more complicated use case it might trigger a file to be read from the filesystem, or a pull from a database or a call to an HTTP service.
+데이터 흐름을 만들려면 subscribe () 메소드 중 하나를 사용하여 Flux에 가입해야합니다. 이러한 메서드 만 데이터 흐름을 만듭니다. 시퀀스에 선언 된 연산자 체인을 통해 다시 도달하고 게시자에게 데이터 작성을 요청합니다. 우리가 함께 작업 한 샘플 샘플에서는 기본 문자열 컬렉션이 반복된다는 것을 의미합니다. 좀 더 복잡한 경우에는 파일 시스템에서 파일을 읽거나 데이터베이스 또는 HTTP 서비스 호출에서 가져 오기를 트리거 할 수 있습니다.
 
-Here’s a call to subscribe() in action:
+실행중인 subscribe () 호출이 있습니다.:
 ```
 Flux.just("red", "white", "blue")
   .log()
   .map(String::toUpperCase)
 .subscribe();
 ```
-The output is:
+출력은 다음과 같습니다.:
 ```
 09:17:59.665 [main] INFO reactor.core.publisher.FluxLog -  onSubscribe(reactor.core.publisher.FluxIterable$IterableSubscription@3ffc5af1)
 09:17:59.666 [main] INFO reactor.core.publisher.FluxLog -  request(unbounded)
@@ -87,16 +89,17 @@ The output is:
 09:17:59.667 [main] INFO reactor.core.publisher.FluxLog -  onNext(blue)
 09:17:59.667 [main] INFO reactor.core.publisher.FluxLog -  onComplete()
 ```
-So we can see from this that the effect of subscribe() without an argument, is to request the publisher to send all data — there’s only one request() logged and it’s "unbounded". We can also see callbacks for each item that is published (onNext()), for the end of the sequence (onComplete()), and for the original subscription (onSubscribe()). If you needed to you could listen for those events yourself using the doOn*() methods in Flux, which are themselves operators, not subscribers, so they don’t cause any data to flow on their own.
 
-The subscribe() method is overloaded, and the other variants give you different options to control what happens. One important and convenient form is subscribe() with callbacks as arguments. The first argument is a Consumer, which gives you a callback with each of the items, and you can also optionally add a Consumer for an error if there is one, and a vanilla Runnable to execute when the sequence is complete. For example, just with the per-item callback:
+따라서 인수없이 subscribe ()의 효과가 게시자에게 모든 데이터를 보내도록 요청하는 것입니다. 하나의 요청 () 만 기록되고 "제한되지 않음"입니다. 또한 게시 된 항목 (onNext ()), 시퀀스 종료 (onComplete ()) 및 원래 구독 (onSubscribe ())에 대한 콜백을 볼 수 있습니다. 필요하다면 Flux에서 doOn * () 메소드를 사용하여 직접 이벤트를 수신 할 수 있습니다.이 메소드는 가입자가 아닌 운영자이기 때문에 자체적으로 데이터가 흐르지 않습니다.
+
+subscribe () 메서드가 오버로드되고 다른 변형을 사용하면 발생하는 상황을 제어하는 다양한 옵션이 제공됩니다. 하나의 중요하고 편리한 형식은 콜백을 인수로 갖는 subscribe ()입니다. 첫 번째 인수는 각 항목에 대해 콜백을 제공하는 Consumer이며, Consumer에 오류가 있으면 추가하고 시퀀스 완료시 실행할 바닐라 Runnable을 선택적으로 추가 할 수도 있습니다. 예를 들어 항목 당 콜백만으로:
 ```
 Flux.just("red", "white", "blue")
     .log()
     .map(String::toUpperCase)
 .subscribe(System.out::println);
 ```
-Here’s the output:
+출력은 다음과 같습니다.:
 ```
 09:56:12.680 [main] INFO reactor.core.publisher.FluxLog -  onSubscribe(reactor.core.publisher.FluxArray$ArraySubscription@59f99ea)
 09:56:12.682 [main] INFO reactor.core.publisher.FluxLog -  request(unbounded)
@@ -108,7 +111,7 @@ WHITE
 BLUE
 09:56:12.682 [main] INFO reactor.core.publisher.FluxLog -  onComplete()
 ```
-We could control the flow of data, and make it "bounded", in a variety of ways. The raw API for control is the Subscription you get from a Subscriber. The equivalent long form of the short call to subscribe() above is:
+우리는 데이터의 흐름을 제어하고 다양한 방식으로 "제한적"으로 만들 수 있습니다. 제어를위한 원시 API는 구독자로부터받는 구독입니다. 위의 subscribe ()에 대한 짧은 호출의 동일한 긴 형식은 다음과 같습니다.:
 ```
 .subscribe(new Subscriber<String>() {
 
@@ -129,7 +132,7 @@ We could control the flow of data, and make it "bounded", in a variety of ways. 
 
 });
 ```
-To control the flow, e.g. to consume at most 2 items at a time, you could use the Subscription more intelligently:
+흐름을 제어하기 위해. 한 번에 최대 2 개의 항목을 소비하려면 Subscription을보다 지능적으로 사용할 수 있습니다:
 ```
 .subscribe(new Subscriber<String>() {
 
@@ -152,7 +155,7 @@ To control the flow, e.g. to consume at most 2 items at a time, you could use th
      }
 ...
 ```
-This Subscriber is "batching" items 2 at a time. It’s a common use case so you might think about extracting the implementation to a convenience class, and that would make the code more readable too. The output looks like this:
+이 구독자는 한 번에 2 번 항목을 일괄 처리합니다. 일반적인 사용 사례이므로 구현을 편의 클래스로 추출하면 코드를보다 쉽게 ​​읽을 수 있습니다. 결과는 다음과 같습니다:
 ```
 09:47:13.562 [main] INFO reactor.core.publisher.FluxLog -  onSubscribe(reactor.core.publisher.FluxArray$ArraySubscription@61832929)
 09:47:13.564 [main] INFO reactor.core.publisher.FluxLog -  request(2)
@@ -162,14 +165,14 @@ This Subscriber is "batching" items 2 at a time. It’s a common use case so you
 09:47:13.565 [main] INFO reactor.core.publisher.FluxLog -  onNext(blue)
 09:47:13.565 [main] INFO reactor.core.publisher.FluxLog -  onComplete()
 ```
-In fact the batching subscriber is such a common use case that there are convenience methods already available in Flux. The batching example above can be implemented like this:
+실제로 일괄 처리 구독자는 Flux에서 이미 사용할 수있는 편리한 방법이있는 일반적인 사용 사례입니다. 위의 일괄 처리 예제는 다음과 같이 구현할 수 있습니다.:
 ```
 Flux.just("red", "white", "blue")
   .log()
   .map(String::toUpperCase)
 .subscribe(null, 2);
 ```
-(note the call to subscribe() with a request limit). Here’s the output:
+(요청 제한이있는 subscribe () 호출 참고). 여기 출력:
 ```
 10:25:43.739 [main] INFO reactor.core.publisher.FluxLog -  onSubscribe(reactor.core.publisher.FluxArray$ArraySubscription@4667ae56)
 10:25:43.740 [main] INFO reactor.core.publisher.FluxLog -  request(2)
@@ -180,14 +183,14 @@ Flux.just("red", "white", "blue")
 10:25:43.741 [main] INFO reactor.core.publisher.FluxLog -  onComplete()
 ```
 >Tip
->A library that will process sequences for you, like Spring Reactive Web, can handle the subscriptions. It’s good to be able to push these concerns down the stack because it saves you from cluttering your code with non-business logic, making it more readable and easier to test and maintain. So as a rule, it is a good thing if you can avoid subscribing to a sequence, or at least push that code into a processing layer, and out of the business logic.
+>Spring Reactive Web과 같은 시퀀스를 처리 할 라이브러리가 구독을 처리 할 수 ​​있습니다. 이러한 문제는 스택을 사용하지 않아도되므로 비즈니스 로직이 아닌 코드를 복잡하게 만들지 않아 읽기 쉽고 테스트 및 유지 관리가 쉬워 지므로 이점을 누릴 수 있습니다. 원칙적으로 시퀀스 구독을 피하거나 처리 계층에 코드를 푸시하고 비즈니스 로직 외부로 푸시하는 것은 좋은 방법입니다.
 
 
 ## Threads, Schedulers and Background Processing
 
-An interesting feature of all the logs above is that they are all on the "main" thread, which is the thread of the caller to subscribe(). This highlights an important point: Reactor is extremely frugal with threads, because that gives you the greatest chance of the best possible performance. That might be a surprising statement if you’ve been wrangling threads and thread pools and asynchronous executions for the last 5 years, trying to squeeze more juice out of your services. But it’s true: in the absence of any imperative to switch threads, even if the JVM is optimized to handle threads very efficiently, it is always faster to do computation on a single thread. Reactor has handed you the keys to control all the asynchronous processing, and it assumes you know what you are doing.
+위의 모든 로그의 흥미로운 특징은 구독자 ()의 호출자 인 스레드가 "주"스레드에 있다는 것입니다. 이것은 중요한 점을 강조합니다. Reactor는 스레드에 대해 매우 검소합니다. 이는 최상의 성능을 발휘할 수있는 가장 큰 기회를 제공하기 때문입니다. 지난 5 년 동안 스레드와 스레드 풀 및 비동기 실행 문제를 해결하고 서비스에서 더 많은 주스를 뽑으려고하면 놀라운 결과 일 수 있습니다. 그러나 사실입니다. 스레드를 전환하는 것이 필수적이지 않으면 JVM이 스레드를 매우 효율적으로 처리하도록 최적화되어 있어도 단일 스레드에서 계산하는 것이 항상 더 빠릅니다. Reactor는 모든 비동기 처리를 제어 할 수있는 키를 사용자에게 제공했으며 사용자가 수행중인 작업을 알고 있다고 가정합니다.
 
-Flux provides a few configurer methods that control the thread boundaries. For example, you can configure the subscriptions to be handled in a background thread using Flux.subscribeOn():
+Flux는 스레드 경계를 제어하는 ​​몇 가지 구성 메소드를 제공합니다. 예를 들어, Flux.subscribeOn ()을 사용하여 배경 스레드에서 처리 할 구독을 구성 할 수 있습니다.:
 ```
 Flux.just("red", "white", "blue")
   .log()
@@ -195,7 +198,7 @@ Flux.just("red", "white", "blue")
   .subscribeOn(Schedulers.parallel())
 .subscribe(null, 2);
 ```
-the result can be seen in the output:
+결과는 출력에서 볼 수있다.:
 ```
 13:43:41.279 [parallel-1-1] INFO reactor.core.publisher.FluxLog -  onSubscribe(reactor.core.publisher.FluxArray$ArraySubscription@58663fc3)
 13:43:41.280 [parallel-1-1] INFO reactor.core.publisher.FluxLog -  request(2)
@@ -206,8 +209,8 @@ the result can be seen in the output:
 13:43:41.281 [parallel-1-1] INFO reactor.core.publisher.FluxLog -  onComplete()
 ```
 >Tip
->if you write this code yourself, or copy-paste it, remember to wait for the processing to stop before the JVM exits.
-Note that the subscription, and all the processing, takes place on a single background thread "parallel-1-1" — this is because we asked for the subscriber to our main Flux to be in the background. This is fine if the item processing is CPU intensive (but pointless being in a background thread, in point of fact, since you pay for the context switch but don’t get the results any faster). You might also want to be able to perform item processing that is I/O intensive and possibly blocking. In this case, you would want to get it done as quickly as possible without blocking the caller. A thread pool is still your friend, and that’s what you get from Schedulers.parallel(). To switch the processing of the individual items to separate threads (up to the limit of the pool) we need to break them out into separate publishers, and for each of those publishers ask for the result in a background thread. One way to do this is with an operator called flatMap(), which maps the items to a Publisher (potentially of a different type), and then back to a sequence of the new type:
+>이 코드를 직접 작성하거나 복사하여 붙여 넣으면 JVM이 종료되기 전에 처리가 중지 될 때까지 기다려야합니다.
+구독 및 모든 처리는 단일 배경 스레드 "parallel-1-1"에서 발생합니다. 이는 우리가 주요 Flux의 구독자를 배경으로 요청했기 때문입니다. 항목 처리가 CPU 집중적 인 경우 (사실상 백그라운드 스레드에 있다는 것은 의미가 없지만 컨텍스트 스위치에 대해 비용을 지불하지만 결과가 더 빠르기 때문에) 괜찮습니다. I / O를 집중적으로 사용하고 차단하는 항목 처리를 수행 할 수도 있습니다. 이 경우 호출자를 차단하지 않고 최대한 빨리 처리하려고 할 수 있습니다. 스레드 풀은 여전히 ​​당신의 친구이며, Schedulers.parallel ()에서 얻을 수 있습니다. 개별 항목의 처리를 개별 스레드로 전환하려면 (풀의 한도까지) 개별 게시자로 분리해야하며 각 게시자는 결과 스레드를 백그라운드 스레드에서 요청해야합니다. 이 작업을 수행하는 한 가지 방법은 flatMap ()이라는 연산자로 항목을 잠재적으로 다른 유형의 게시자에 매핑 한 다음 새로운 유형의 시퀀스로 다시 매핑하는 것입니다:
 ```
 Flux.just("red", "white", "blue")
   .log()
@@ -219,9 +222,9 @@ Flux.just("red", "white", "blue")
   log.info("Consumed: " + value);
 })
 ```
-Note here the use of flatMap() to push the items down into a "child" publisher, where we can control the subscription per item instead of for the whole sequence. Reactor has built in default behaviour to hang onto a single thread as long as possible, so we need to be explicit if we want it to process specific items or groups of items in a background thread. Actually, this is one of a handful of recognized tricks for forcing parallel processing (see the Reactive Gems issue for more detail).
+여기서 flatMap ()을 사용하여 항목을 "하위"게시자로 푸시 다운합니다. 여기에서 전체 시퀀스 대신 항목 당 구독을 제어 할 수 있습니다. Reactor는 가능한 한 오랫동안 단일 스레드에 매달릴 기본 동작을 내장하고 있으므로 특정 스레드 나 항목 그룹을 백그라운드 스레드에서 처리하도록하려면 Reactor가 명시 적이어야합니다. 사실 이것은 병렬 처리를 강제하는 몇 가지 알려진 트릭 중 하나입니다 (자세한 내용은 Reactive Gems 문제 참조).
 
-The output looks like this:
+결과는 다음과 같습니다.:
 ```
 15:24:36.596 [main] INFO reactor.core.publisher.FluxLog -  onSubscribe(reactor.core.publisher.FluxIterable$IterableSubscription@6f1fba17)
 15:24:36.610 [main] INFO reactor.core.publisher.FluxLog -  request(2)
@@ -233,11 +236,12 @@ The output looks like this:
 15:24:36.613 [parallel-1-1] INFO reactor.core.publisher.FluxLog -  onComplete()
 15:24:36.614 [parallel-3-1] INFO com.example.FluxFeaturesTests - Consumed: BLUE
 15:24:36.617 [parallel-2-1] INFO com.example.FluxFeaturesTests - Consumed: WHITE
-Notice that there are now multiple threads consuming the items, and the concurrency hint in the flatMap() ensures that there are 2 items being processed at any given time, as long as they are available. We see request(1) a lot because the system is trying to keep 2 items in the pipeline, and generally they don’t finish processing at the same time. Reactor tries to be very smart here in fact, and it pre-fetches items from the upstream Publisher to try to eliminate waiting time for the subscriber (we aren’t seeing that here because the numbers are low — we are only processing 3 items).
 ```
+이제 항목을 소비하는 스레드가 여러 개 있고 flatMap ()의 동시성 힌트는 사용 가능한 한 2 개의 항목이 주어진 시간에 처리되도록합니다. 시스템은 파이프 라인에 2 개의 항목을 유지하려고 시도하고 있으며 일반적으로 동시에 처리를 완료하지 않기 때문에 요청 (1)이 많이 보입니다. Reactor는 사실 매우 똑똑하기 때문에 구독자 대기 시간을 없애기 위해 업스트림 게시자의 항목을 미리 가져옵니다 (숫자가 낮기 때문에 여기서는 표시되지 않습니다 - 우리는 3 개의 항목 만 처리 중입니다) .
+
 >Tip
->Three items ("red", "white", "blue") might be too few to convincingly see more than one background thread, so it might be better to generate more data. You could do that with a random number generator, for instance.
-Flux also has a publishOn() method which is the same, but for the listeners (i.e. onNext() or consumer callbacks) instead of for the subscriber itself:
+>세 가지 항목 ( "빨간색", "흰색", "파란색")이 너무 적어서 하나 이상의 배경 스레드를 확실하게 볼 수 없으므로 더 많은 데이터를 생성하는 것이 좋습니다. 예를 들어 난수 생성기를 사용하면됩니다.
+Flux에는 publishOn () 메소드도 있지만 구독자 자체 대신에 리스너 (onNext () 또는 소비자 콜백)에 대해 동일합니다.:
 ```
 Flux.just("red", "white", "blue")
   .log()
@@ -248,7 +252,7 @@ Flux.just("red", "white", "blue")
     log.info("Consumed: " + value);
 });
 ```
-The output looks like this:
+결과는 다음과 같습니다.:
 ```
 15:12:09.750 [sub-1-1] INFO reactor.core.publisher.FluxLog -  onSubscribe(reactor.core.publisher.FluxIterable$IterableSubscription@172ed57)
 15:12:09.758 [sub-1-1] INFO reactor.core.publisher.FluxLog -  request(2)
@@ -261,19 +265,21 @@ The output looks like this:
 15:12:09.777 [sub-1-1] INFO reactor.core.publisher.FluxLog -  onComplete()
 15:12:09.783 [pub-1-1] INFO com.example.FluxFeaturesTests - Consumed: BLUE
 ```
-Notice that the consumer callbacks (logging "Consumed: …​") are on the publisher thread pub-1-1. If you take out the subscribeOn() call, you might see all of the 2nd chunk of data processed on the pub-1-1 thread as well. This, again, is Reactor being frugal with threads — if there’s no explicit request to switch threads it stays on the same one for the next call, whatever that is.
+
+소비자 콜백 ( "Consumed : ..."로깅)은 게시자 스레드 pub-1-1에 있습니다. subscribeOn () 호출을 꺼내면 pub-1-1 스레드에서 처리 된 두 번째 데이터 청크도 모두 표시됩니다. 다시 말해, Reactor가 쓰레드에 대해 검소한 것입니다. 쓰레드를 전환하라는 명시적인 요청이 없으면 다음 호출을 위해 동일한 스레드에 머무르게됩니다.
 
 >Note
->We changed the code in this sample from subscribe(null, 2) to adding a prefetch=2 to the publishOn(). In this case the fetch size hint in subscribe() would have been ignored.
+>이 샘플의 코드를 subscribe (null, 2)에서 publishOn ()에 프리 페치 = 2를 추가하는 것으로 변경했습니다. 이 경우 subscribe ()의 가져 오기 크기 힌트가 무시되었습니다.
 
 ## Extractors: The Subscribers from the Dark Side
 
-There is another way to subscribe to a sequence, which is to call Mono.block() or Mono.toFuture() or Flux.toStream() (these are the "extractor" methods — they get you out of the Reactive types into a less flexible, blocking abstraction). Flux also has converters collectList() and collectMap() that convert from Flux to Mono. They don’t actually subscribe to the sequence, but they do throw away any control you might have had over the suscription at the level of the individual items.
+Mono.block () 또는 Mono.toFuture () 또는 Flux.toStream ()을 호출하는 시퀀스를 구독하는 또 다른 방법이 있습니다 (이들은 "추출기"메서드입니다 - 그들은 당신을 Reactive 타입에서 덜 유연한, 추상화 차단). Flux에는 Flux에서 Mono로 변환하는 변환기 collectList () 및 collectMap ()도 있습니다. 그들은 실제로 시퀀스에 가입하지 않지만 개별 항목 수준에서 종결보다 더 많은 컨트롤을 버립니다.
 
-Warning
-A good rule of thumb is "never call an extractor". There are some exceptions (otherwise the methods would not exist). One notable exception is in tests because it’s useful to be able to block to allow results to accumulate.
-These methods are there as an escape hatch to bridge from Reactive to blocking; if you need to adapt to a legacy API, for instance Spring MVC. When you call Mono.block() you throw away all the benefits of the Reactive Streams. This is the key difference between Reactive Streams and Java 8 Streams — the native Java Stream only has the "all or nothing" subscription model, the equivalent of Mono.block(). Of course subscribe() can block the calling thread as well, so it’s just as dangerous as the converter methods, but you have more control — you can prevent it from blocking by using subscribeOn() and you can drip the items through by applying back pressure and periodically deciding whether to continue.
+>Warning
+>엄지 손가락의 좋은 규칙은 "절대로 추출기를 부르지 말라"입니다. 몇 가지 예외가 있습니다 (그렇지 않으면 메소드가 존재하지 않을 것입니다). 주목할만한 >예외 중 하나는 테스트 결과입니다. 결과를 축적 할 수 있도록 차단하는 것이 유용하기 때문입니다.
+
+이 메소드들은 Reactive에서 Blocking으로 이어지는 탈출 해치 (escape hatch)로 존재합니다. Spring MVC와 같은 레거시 API에 적응해야하는 경우. Mono.block ()을 호출하면 리 액티브 스트림의 모든 이점을 버리게됩니다. 이것은 리 액티브 스트림과 Java 8 스트림의 주요 차이점입니다. 원시 Java 스트림은 Mono.block ()에 해당하는 "모두 또는 아무것도 없음"구독 모델 만 갖습니다. 물론 subscribe ()도 호출 스레드를 차단할 수 있으므로 변환기 메서드와 마찬가지로 위험하지만 더 많은 제어 권한이 있습니다. subscribeOn ()을 사용하여 차단하지 못하도록하고 다시 적용하여 항목을 똑똑 떨어 뜨릴 수 있습니다 계속할지 여부를 주기적으로 결정해야합니다.
 
 ## Conclusion
 
-In this article we have covered the basics of the Reactive Streams and Reactor APIs. If you need to know more there are plenty of places to look, but there’s no substitute for hands on coding, so use the code in GitHub (for this article in tests in the project called "flux"), or head over to the Lite RX Hands On workshop. So far, really this is just overhead, and we haven’t learned much that we couldn’t have done in a more obvious way using non-Reactive tools. The next article in the series will dig a little deeper into the blocking, dispatching and asynchronous sides of the Reactive model, and show you what opportunities there are to reap the real benefits.
+이 기사에서는 Reactive Streams 및 Reactor API의 기본 사항을 다루었습니다. 더 많이 알아야 할 곳이 많이 있지만 코딩에 대한 대안이 없으므로 GitHub에서 코드를 사용하십시오 (이 프로젝트의 "flux"테스트에서이 기사에 대해). 또는 Lite로 넘어가십시오. RX 손에 워크샵. 지금까지는 실제로 이것은 오버 헤드였습니다. 우리는 비 반응 도구를 사용하여 더 명백한 방법으로 할 수 없었던 많은 것을 배웠습니다. 이 시리즈의 다음 기사에서는 Reactive 모델의 차단, 디스패치 및 비동기 측면에 대해 좀 더 자세히 살펴보고 실제 이점을 얻을 수있는 기회를 보여줍니다.

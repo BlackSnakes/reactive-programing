@@ -12,7 +12,7 @@ Reactor 라이브러리를 사용하여 필요한 사항을 설명합니다.
 코드를 가지고 놀고 아무 것도 복사하지 않고 코드를보고 싶다면 Github에서 테스트 한 샘플이 있습니다.
 
 시작하려면 https://start.spring.io에서 빈 프로젝트를 잡고 Reactor Core 종속성을 추가하십시오.  
-Maven을 이용한 설정
+Maven을 이용한 설정: 
 ```
 <dependency>
 	<groupId>io.projectreactor</groupId>

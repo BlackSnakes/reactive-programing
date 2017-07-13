@@ -19,7 +19,7 @@ Maven을 이용한 설정:
 	<artifactId>reactor-core</artifactId>
 	<version>3.0.0.RC2</version>
 </dependency>
-```    
+```
 유사하게 Gradle을 사용하여 설정할 수 있습니다.:
 ```
 compile 'io.projectreactor:reactor-core:3.0.0.RC2'

@@ -1,50 +1,69 @@
 # Notes on Reactive Programming Part II: Writing Some Code
 
+이 기사에서는 Reactive Programming에 대한 시리즈를 계속 진행하며 실제 코드샘플을 통해 몇 가지 개념을 설명하는 데 집중합니다. 
+최종적으로 Reactive가 무엇이 다른지와 Reactive를 Funtional하게 만드는법을 이해하는 것입니다. 
+여기의 예제는 매우 추상적이지만 API와 프로그래밍 스타일에 대해 생각하고 다른 방식에 대한 느낌을 갖기 시작할 수있는 방법을 제공합니다. 
+Reactive의 요소를보고 데이터 흐름을 제어하고 필요한 경우 백그라운드 스레드에서 처리하는 방법을 배웁니다.
 
-이 기사에서는 Reactive Programming에 대한 시리즈를 계속 진행하며 실제 코드 샘플을 통해 몇 가지 개념을 설명하는 데 집중합니다. 최종 결과는 Reactive가 무엇이 다른 것인지, 그리고 Reactive를 기능적으로 만드는 점을 이해하는 것입니다. 여기의 예제는 매우 추상적이지만 API와 프로그래밍 스타일에 대해 생각하고 다른 방식에 대한 느낌을 갖기 시작할 수있는 방법을 제공합니다. Reactive의 요소를보고 데이터 흐름을 제어하고 필요한 경우 백그라운드 스레드에서 처리하는 방법을 배웁니다.
+## 프로젝트 설정
 
-## Setting Up a Project
+Reactor 라이브러리를 사용하여 필요한 사항을 설명합니다. 
+코드는 다른 도구로 쉽게 작성할 수 있습니다. 
+코드를 가지고 놀고 아무 것도 복사하지 않고 코드를보고 싶다면 Github에서 테스트 한 샘플이 있습니다.
 
-Reactor 라이브러리를 사용하여 필요한 사항을 설명합니다. 코드는 다른 도구로 쉽게 작성할 수 있습니다. 코드를 가지고 놀고 아무 것도 복사하지 않고 코드를보고 싶다면 Github에서 테스트 한 샘플이 있습니다.
-
-To get started grab a blank project from https://start.spring.io and add the Reactor Core dependency. With Maven
+시작하려면 https://start.spring.io에서 빈 프로젝트를 잡고 Reactor Core 종속성을 추가하십시오.  
+Maven을 이용한 설정
 ```
 <dependency>
 	<groupId>io.projectreactor</groupId>
 	<artifactId>reactor-core</artifactId>
 	<version>3.0.0.RC2</version>
 </dependency>
-```    
-Gradle을 사용하면 매우 유사합니다.:
+```    
+유사하게 Gradle을 사용하여 설정할 수 있습니다.:
 ```
 compile 'io.projectreactor:reactor-core:3.0.0.RC2'
 ```    
 이제 코드를 작성해 보겠습니다.
 
-## What Makes it Functional?
+## 무엇이 Functional하게 만드는가?
 
-Reactive의 기본 구성 요소는 일련의 이벤트와 게시자 및 해당 이벤트 구독자라는 두 가지 주체입니다. 그것이 시퀀스이기 때문에 시퀀스를 "스트림"이라고 부를 수도 있습니다. 필요하다면 "stream"이라는 단어를 작은 "s"와 함께 사용 하겠지만 Java 8에는 다른 java.util.Stream이 있으므로 혼동하지 않도록하십시오. 어쨌든 게시자와 구독자에게 서사를 집중하려고합니다 (즉 리 액티브 스트림이하는 것입니다).
+Reactive의 기본 구성 요소는 일련의 이벤트(Event)와 게시자(Publisher) 및 해당 이벤트 구독자(Subscriber)라는 두 가지 주체입니다. 
+그것이 시퀀스이기 때문에 시퀀스를 "스트림"이라고 부를 수도 있습니다. 
+필요하다면 "stream"이라는 단어를 작은 "s"와 함께 사용 하겠지만 Java 8에는 다른 java.util.Stream이 있으므로 혼동하지 않도록하십시오. 
+어쨌든 게시자와 구독자에 대한 설명에 집중하려고합니다. (그게 리액티브 스트림이하는 것입니다).
 
-Reactor는 샘플에서 사용할 라이브러리이므로 여기 표기법을 고수하고 게시자를 Flux (Reactive Streams의 인터페이스 Publisher를 구현 함)라고 부릅니다. RxJava 라이브러리는 매우 유사하고 많은 병렬 기능을 가지고 있으므로이 경우 Observable에 대해 대신 설명 하겠지만 코드는 매우 유사합니다. (Reactor 2.0은 Stream이라고 불렀고, Java 8 Streams에 관해서도 혼란스러워하기 때문에 Reactor 3.0에서만 새로운 코드를 사용합니다.)
+Reactor는 샘플에서 사용할 라이브러리이므로 여기서는 Reactor표기법에따라 게시자를 Flux(Reactive Streams의 인터페이스 Publisher를 구현 함)라고 부릅니다. 
+RxJava 라이브러리는 매우 유사하고 많은 병렬 기능을 가지고 있으므로 이 경우 Observable에 대해 대신 설명 하겠지만 코드는 매우 유사합니다. 
+(Reactor 2.0은 Stream이라고 불렀고, Java 8 Streams에 관해서도 혼란스러워하기 때문에 Reactor 3.0에서만 새로운 코드를 사용합니다.)
 
 ## Generators
 
-Flux는 특정 POJO 유형의 이벤트 시퀀스를 발행하는 게시자이므로 일반적인 것입니다. 즉, Flux <T>는 T의 게시자입니다. Flux는 다양한 출처에서 자체의 인스턴스를 만들 수있는 정적 인 편리한 메소드를 가지고 있습니다. 예를 들어, 배열에서 Flux를 만들려면:
+Flux는 특정 POJO 유형의 이벤트 시퀀스를 발행하는 게시자이므로 일반적인 것입니다. 
+즉, Flux<T>는 T의 게시자입니다. Flux는 다양한 소스에서 자체의 인스턴스를 만들 수 있는 정적인 편리한 메소드를 가지고 있습니다. 
+예를 들어, 배열로 Flux를 만들려면:
 ```java
 Flux<String> flux = Flux.just("red", "white", "blue");
 ```
-우리는 방금 Flux를 만들었고, 이제 우리는 그것을 가지고 할 수 있습니다. 실제로는 두 가지 작업 만 수행 할 수 있습니다 : 변환 (변환 또는 다른 시퀀스와 결합), 구독 (게시자).
+우리는 방금 Flux를 만들었고, 이제 우리는 그것을 가지고 뭔가를 할 수 있습니다. 
+실제로는 두 가지 작업 만 수행 할 수 있습니다 : 변환 (변환 또는 다른 시퀀스와 결합), 구독 (게시자).
 
 ## Single Valued Sequences
 
-종종 하나 또는 0 개의 요소 만있는 시퀀스를 발견하게됩니다. 예를 들어 ID로 엔티티를 찾는 저장소 메소드가 있습니다. Reactor에는 단일 값 또는 빈 Flux를 나타내는 Mono 유형이 있습니다. Mono는 Flux와 매우 유사한 API를 가지고 있지만 모든 연산자가 단일 값 시퀀스에 대해 이해할 수있는 것은 아니기 때문에 더욱 집중적입니다. 또한 RxJava에는 Single이라고하는 볼트 (버전 1.x)가 있고 빈 시퀀스에는 Completable도 있습니다. Reactor의 빈 시퀀스는 Mono <Void>입니다.
+종종 하나 또는 0 개의 요소 만있는 시퀀스를 발견하게됩니다. 
+예를 들어 ID로 엔티티를 찾는 repository 메소드가 있습니다. 
+Reactor에는 단일 값 또는 빈 Flux를 나타내는 Mono 유형이 있습니다. 
+Mono는 Flux와 매우 유사한 API를 가지고 있지만 모든 연산자가 단일 값 시퀀스에 대해 이해할 수있는 것은 아니기 때문에 더욱 집중적입니다. 
+또한 RxJava에는 Single이라고하는 볼트 (버전 1.x)가 있고 빈 시퀀스에는 Completable도 있습니다. 
+Reactor의 빈 시퀀스는 Mono <Void>입니다.
 
 ## Operators
 
+Flux에는 많은 메소드가 있으며 거의 모든 메소드가 연산자입니다. 
+Javadocs에서 더 좋은 정보를 찾을 수 있기 때문에 여기서 모든 것을 보지는 않을 것입니다. 
+우리는 연산자(Operator)가 무엇인지, 그리고 그것으로 무엇을 할 수 있는지에 대한 영감을 얻을 필요가 있습니다.
 
-Flux에는 많은 메소드가 있으며 거의 모든 메소드가 연산자입니다. Javadocs와 같이 더 나은 곳을 찾을 수 있기 때문에 여기서 모든 것을 보지 않을 것입니다. 우리는 운영자가 무엇인지, 그리고 그것이 당신을 위해 무엇을 할 수 있는지에 대한 풍미를 얻을 필요가 있습니다.
-
-예를 들어 Flux 내부의 내부 이벤트를 표준 출력에 기록하려면 .log () 메소드를 호출 할 수 있습니다. 또는 map ()을 사용하여 변형 할 수 있습니다.:
+예를 들어 Flux 내부의 내부 이벤트를 표준 출력에 기록하려면 .log () 메소드를 호출 할 수 있습니다. 또한 map()을 사용하여 변형 할 수 있습니다.:
 ```java
 Flux<String> flux = Flux.just("red", "white", "blue");
 
@@ -52,11 +71,16 @@ Flux<String> upper = flux
   .log()
   .map(String::toUpperCase);
 ```  
-이 코드에서는 입력에서 문자열을 대문자로 변환하여 문자열을 변환했습니다. 지금까지 그렇게 사소한.
+이 코드에서는 입력에서 문자열을 대문자로 변환하여 문자열을 변환했습니다. 사소하지만.
 
-이 작은 샘플에 대해 흥미로운 점은 마음이 부는 것, 심지어 익숙하지 않은 경우에도 데이터가 아직 처리되지 않았다는 것입니다. 말 그대로 아무것도 기록되지 않았기 때문에 아무 것도 기록되지 않았습니다 (시도해보십시오). Flux에서 호출하는 연산자는 나중에 실행할 계획을 세우는 데 그 몫을합니다. 그것은 완전히 선언적이며 사람들이 "기능적"이라고 부르는 이유입니다. 연산자에 구현 된 로직은 데이터가 흐르기 시작할 때만 실행되며 누군가가 Flux (또는 Publisher와 동등한)에 가입 할 때까지는 발생하지 않습니다.
+이 작은 샘플에 대해 흥미로운 점은 다시보면, 만약 사용되지 않았다면 데이터가 아직 처리되지 않았다는 것입니다. 
+말 그대로 아무것도 기록되지 않았기 때문에 아무 것도 기록되지 않았습니다 (한번 해보면 압니다). 
+Flux에서 호출하는 연산자는 나중에 실행할 계획을 세우는 데 그 몫을합니다. 
+그것은 완전히 선언적이며 사람들이 "기능적"이라고 부르는 이유입니다. 
+연산자에 구현 된 로직은 데이터가 흐르기 시작할 때만 실행되며 누군가가 Flux (또는 Publisher와 동등한)에 가입 할 때까지는 발생하지 않습니다.
 
-일련의 데이터를 처리하는 것과 동일한 선언적, 기능적 접근 방식이 모든 Reactive 라이브러리와 Java 8 Streams에 존재합니다. Flux와 동일한 내용의 Stream을 사용하여 이와 유사한 코드를 고려하십시오.:
+일련의 데이터를 처리하는 것과 동일한 선언적, 기능적 접근 방식이 모든 Reactive 라이브러리와 Java 8 Streams에 있습니다. 
+Flux와 동일한 내용의 Stream을 사용하여 이와 유사한 코드를 고려하십시오.:
 ```java
 Stream<String> stream = Streams.of("red", "white", "blue");
 Stream<String> upper = stream.map(value -> {
@@ -64,10 +88,16 @@ Stream<String> upper = stream.map(value -> {
     return value.toUpperCase();
 });
 ```
-Flux에 대한 관찰은 여기에 적용됩니다. 데이터가 처리되지 않고 실행 계획에 불과합니다. 그러나 Flux와 Stream 간에는 몇 가지 중요한 차이점이 있습니다. 이로 인해 Stream이 Reactive 사용 사례의 부적절한 API가됩니다. Flux에는 훨씬 더 많은 연산자가 있으며 그 중 대다수는 편의성을 제공하지만 실제 차이점은 데이터를 소비하려는 경우에 발생하므로 다음에 살펴볼 필요가 있습니다.
+Flux에 대한 관찰(observation)은 여기에 적용됩니다. 
+데이터가 처리되지 않으면 실행 계획에 불과합니다. 
+그러나 Flux와 Stream 간에는 몇 가지 중요한 차이점이 있습니다. 
+이로 인해 Stream이 Reactive 사용 사례의 부적절한 API가됩니다. 
+Flux에는 훨씬 더 많은 연산자가 있으며 그 중 대다수는 편의성을 제공하지만 실제 차이점은 데이터를 소비하려는 경우에 발생하므로 다음에 살펴볼 필요가 있습니다.
 
 >Tip
->Reactive Types에는 Sebastien Deleuze가 작성한 유용한 블로그가 있습니다. 여기에서 다양한 스트리밍 API와 반응 API의 차이점은 정의하는 유형과 사용 방법을 살펴 보는 것입니다. Flux와 Stream의 차이점이 더 자세히 설명되어 있습니다.
+>[Reactive Types](https://spring.io/blog/2016/04/19/understanding-reactive-types)에는 Sebastien Deleuze가 작성한 유용한 블로그가 있습니다. 
+>여기에서 다양한 스트리밍 API와 반응 API의 차이점은 정의하는 유형과 사용 방법을 살펴 보는 것입니다. 
+>Flux와 Stream의 차이점이 더 자세히 설명되어 있습니다.
 
 ## Subscribers
 

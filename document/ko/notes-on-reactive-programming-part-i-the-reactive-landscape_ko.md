@@ -1,10 +1,31 @@
 # Notes on Reactive Programming Part I: The Reactive Landscape
 
+리액티브 프로그래밍은 흥미롭지만 필자와 같은 간단한 엔테프라이즈 자바 개발자나 다른 외부인이 이해하기 어려운만큼 매 순간 많은 노이즈가 있습니다.
+
+이 기사 (시리즈의 첫번째 기사) 에서는 그 어지러운 노이즈들에 대한 이해를 밝히는 데 도움이 될 수 있습니다.
+접근 방식은 가급적 구체적이고, 의미론적 Semantics 에 대해서는 언급이 없습니다.
+
+당신이 만일 학문적 접근법이나, 많은 양의 하스켈 샘플 코드를 찾고 있다면, 인터넷에 더 많은 자료가 있고, 아마 여기에 있진 않을 것 같다.
+
 Reactive Programming is interesting (again) and there is a lot of noise about it at the moment, not all of which is very easy to understand for an outsider and simple enterprise Java developer, such as the author. This article (the first in a series) might help to clarify your understanding of what the fuss is about. The approach is as concrete as possible, and there is no mention of "denotational semantics". If you are looking for a more academic approach and loads of code samples in Haskell, the internet is full of them, but you probably don’t want to be here.
+
+리액티브 프로그래밍은 종종 비동기 프로그래밍, 고성능 프로그래밍과 결합되어 그 개념들과 구분하기 어렵지만 실제로 그것들과는 원칙적으로 완전히 다르다.
+
+이건 필연적으로 혼란을 가져온다.
+
+리액티브 프로그래밍은 또한 종종 함수형 리액티브 프로그래밍 혹은 FRP(서로 같은 의미) 와 결합되거나 그렇게 불려진다. 어떤 사람은 리액티브 프로그래밍이 전혀 새로운게 아니며 보통의 일상이하고 한다. (대부분 그들은 자바스크립트를 사용한다.)
+
+다른 사람들은 Microsoft 가 주는 선물이라고 생각한다. (얼마전 어떤 C# 의 확장이 릴리즈되었을때 그것에 대해 크게 환호한 사람들)
+
+Enterprise Java 세계에서는 최근 화제가 되었는데, (에를 들어 Reactive Streams initiative 를 봐라) 새롭고 반짝이는 무언가와 그것들이 만들어내는 언제 어디서나 발생된 간단한 실수들이 많았다. (뭔소리여...)
 
 Reactive Programming is often conflated with concurrent programming and high performance to such an extent that it’s hard to separate those concepts, when actually they are in principle completely different. This inevitably leads to confusion. Reactive Programming is also often referred to as or conflated with Functional Reactive Programming, or FRP (and we use the two interchangeably here). Some people think Reactive is nothing new, and it’s what they do all day anyway (mostly they use JavaScript). Others seem to think that it’s a gift from Microsoft (who made a big splash about it when they released some C# extensions a while ago). In the Enterprise Java space there has been something of a buzz recently (e.g. see the Reactive Streams initiative), and as with anything shiny and new, there are a lot of easy mistakes to make out there, about when and where it can and should be used.
 
 ## What Is It?
+
+Reactive Programming 은 개선된 라우팅과 이벤트의 소비를 포함하는 마이크로 아키텍쳐 스타일이고, 전부 행동를 바꾸기 위해 결합된다.
+
+이는 다소 추상적이며, 이것에 대한 다른 많은 정의도 온라인에 있다. 우리는 Reactive 가 의미하는 것이 무엇인지, 또는 다음에 설명할 것이 왜 중요한지에 대해 좀 더 구체적인 개념을 세우려고 한다.
 
 Reactive Programming is a style of micro-architecture involving intelligent routing and consumption of events, all combining to change behaviour. That’s a bit abstract, and so are many of the other definitions you will come across online. We attempt build up some more concrete notions of what it means to be reactive, or why it might be important in what follows.
 

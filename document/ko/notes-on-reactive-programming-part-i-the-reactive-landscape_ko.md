@@ -23,7 +23,7 @@ Reactive Programming is often conflated with concurrent programming and high per
 
 ## What Is It?
 
-Reactive Programming 은 개선된 라우팅과 이벤트의 소비를 포함하는 마이크로 아키텍쳐 스타일이고, 전부 행동를 바꾸기 위해 결합된다.
+Reactive Programming 은 개선된 라우팅과 이벤트의 소비를 포함하는 마이크로 아키텍쳐 스타일이고, 전부 행동을 바꾸기 위해 결합된다.
 
 이는 다소 추상적이며, 이것에 대한 다른 많은 정의도 온라인에 있다. 우리는 Reactive 가 의미하는 것이 무엇인지, 또는 다음에 설명할 것이 왜 중요한지에 대해 좀 더 구체적인 개념을 세우려고 한다.
 

@@ -63,6 +63,9 @@ taken from the outside world): in a GUI situation, the position of
 the mouse would be a good example.
 (from Terminology Question on Stackoverflow)
 
+참고자료 Mouse is Database.<br/>
+http://huns.me/development/2051#attachment_2068
+
 FRP 는 고성능, 동시성, 비동기 명령과 넌 블러킹 IO에 강한 친화력을 가지고 있다. 
 
 FRP has a strong affinity with high-performance, concurrency, asynchronous operations and non-blocking IO. 
@@ -71,10 +74,20 @@ FRP has a strong affinity with high-performance, concurrency, asynchronous opera
 
 However, it might be helpful to start with a suspicion that FRP has nothing to do with any of them. 
 
+Reactive Model 을 사용할때, 각각의 관심사가 호출자에게 투명하게 처리하는건 당연한 것이다.
 
+It is certainly the case that such concerns can be naturally handled, often transparently to the caller, when using a Reactive model. 
 
+하지만 이러한 관심사를 효과적 혹은 효율적으로 처리하는 면에서는 전적으로 해당 구현에 달려 있다.(따라서 엄격한 판단이 필요하다).
 
-It is certainly the case that such concerns can be naturally handled, often transparently to the caller, when using a Reactive model. But the actual benefit, in terms of handling those concerns effectively or efficiently is entirely up to the implementation in question (and therefore should be subject to a high degree of scrutiny). It is also possible to implement a perfectly sane and useful FRP framework in a synchronous, single-threaded way, but that isn’t really likely to be helpful in trying to use any of the new tools and libraries.
+But the actual benefit, in terms of handling those concerns effectively or efficiently is entirely up to the implementation in question (and therefore should be subject to a high degree of scrutiny). 
+
+또한 동기식으로 싱글 스레드를 사용한 올바르고 유용한 FRP 프레임워크를 구현하는게 가능하지만, 그것은 새로운 도구나 리으버리를 사용려고 하는 데에는 도움이 되지 않는다.
+
+It is also possible to implement a perfectly sane and useful FRP framework in a synchronous, single-threaded way, but that isn’t really likely to be helpful in trying to use any of the new tools and libraries.
+
+참고 : 리액티브 개발 패러다임에 담긴 메시지
+http://www.zdnet.co.kr/column/column_view.asp?artice_id=20161010104628
 
 ## Reactive Use Cases
 

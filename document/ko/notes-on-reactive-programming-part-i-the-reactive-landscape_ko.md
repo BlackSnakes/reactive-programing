@@ -29,26 +29,52 @@ Reactive Programming 은 개선된 라우팅과 이벤트의 소비를 포함하
 
 Reactive Programming is a style of micro-architecture involving intelligent routing and consumption of events, all combining to change behaviour. That’s a bit abstract, and so are many of the other definitions you will come across online. We attempt build up some more concrete notions of what it means to be reactive, or why it might be important in what follows.
 
-The origins of Reactive Programming can probably be traced to the 1970s or even earlier, so there’s nothing new about the idea, but they are really resonating with something in the modern enterprise. This resonance has arrived (not accidentally) at the same time as the rise of microservices, and the ubiquity of multi-core processors. Some of the reasons for that will hopefully become clear.
+Reactive Programming 의 기원은 아마 1970년 혹은 더 이르게 거슬러 올라갈 수 있기에 전혀 새로운 아이디어가 아니지만 그것들은 근대적 엔터프라이즈 안에 무언가 공감되는 것이 있다.
+
+The origins of Reactive Programming can probably be traced to the 1970s or even earlier, so there’s nothing new about the idea, but they are really resonating with something in the modern enterprise. 
+
+이 공명은 마이크로서비스의 발생과 같은 시기에 멀티코어 프로세서를 전제하여 발생했다. (우연이 아니다.) 그 이유 중 어떤건 아마 조금 더 확실해질 것이다.
+
+This resonance has arrived (not accidentally) at the same time as the rise of microservices, and the ubiquity of multi-core processors. Some of the reasons for that will hopefully become clear.
+
+여기 유용한 다른 출처에서 거져온 유용한 정의가 있다:
 
 Here are some useful potted definitions from other sources:
 
-The basic idea behind reactive programming is that there are certain
+> Reactive Programming 뒤의 기본 아이디어는 시간이 지남에 따라 값을 표현하는 데이터 유형이라는 것이다. 이런 시간 경과 변화들을 포함한 Value 의 계산은 시간이 변하는 값을 각자 가진다. (???) <br/>그리고...<br/> 
+첫 이해를 하기에 쉬운 방법은 다음과 같이 너의 프로그램이 스프레드 시트이고 모든 변수들이 셀이라고 생각하는 것이다.
+스프레드시트에서 어떤 셀이 변하면, 그 셀의 변화를 어떤 셀들은 참조한다. 이건 FRP 와 똑같다.<br/>
+지금 일부의 셀들이 스스로 변한다고 생각해보라.(혹은 다른 세계에서 가져온 것들이다): GUI 에서 마우스의 포지션은 좋은 예가 될 수 있다.<br/>
+(Stackoverflow 의 기술 질문에서 가져옴)
+
+>The basic idea behind reactive programming is that there are certain
 datatypes that represent a value "over time". Computations that
 involve these changing-over-time values will themselves have values
 that change over time.
-and…​
-
+and…​<br/>
 An easy way of reaching a first intuition about what it's like is to
 imagine your program is a spreadsheet and all of your variables are
-cells. If any of the cells in a spreadsheet change, any cells that
+cells. 
+<br/>
+If any of the cells in a spreadsheet change, any cells that
 refer to that cell change as well. It's just the same with FRP. Now
 imagine that some of the cells change on their own (or rather, are
 taken from the outside world): in a GUI situation, the position of
 the mouse would be a good example.
 (from Terminology Question on Stackoverflow)
 
-FRP has a strong affinity with high-performance, concurrency, asynchronous operations and non-blocking IO. However, it might be helpful to start with a suspicion that FRP has nothing to do with any of them. It is certainly the case that such concerns can be naturally handled, often transparently to the caller, when using a Reactive model. But the actual benefit, in terms of handling those concerns effectively or efficiently is entirely up to the implementation in question (and therefore should be subject to a high degree of scrutiny). It is also possible to implement a perfectly sane and useful FRP framework in a synchronous, single-threaded way, but that isn’t really likely to be helpful in trying to use any of the new tools and libraries.
+FRP 는 고성능, 동시성, 비동기 명령과 넌 블러킹 IO에 강한 친화력을 가지고 있다. 
+
+FRP has a strong affinity with high-performance, concurrency, asynchronous operations and non-blocking IO. 
+
+하지만, FRP 가 그들과 어떠한 관련이 없다는 의심으로 시작하는 것이 도움이 될 것이다.
+
+However, it might be helpful to start with a suspicion that FRP has nothing to do with any of them. 
+
+
+
+
+It is certainly the case that such concerns can be naturally handled, often transparently to the caller, when using a Reactive model. But the actual benefit, in terms of handling those concerns effectively or efficiently is entirely up to the implementation in question (and therefore should be subject to a high degree of scrutiny). It is also possible to implement a perfectly sane and useful FRP framework in a synchronous, single-threaded way, but that isn’t really likely to be helpful in trying to use any of the new tools and libraries.
 
 ## Reactive Use Cases
 

@@ -45,7 +45,8 @@ Here are some useful potted definitions from other sources:
 첫 이해를 하기에 쉬운 방법은 다음과 같이 너의 프로그램이 스프레드 시트이고 모든 변수들이 셀이라고 생각하는 것이다.
 스프레드시트에서 어떤 셀이 변하면, 그 셀의 변화를 어떤 셀들은 참조한다. 이건 FRP 와 똑같다.<br/>
 지금 일부의 셀들이 스스로 변한다고 생각해보라.(혹은 다른 세계에서 가져온 것들이다): GUI 에서 마우스의 포지션은 좋은 예가 될 수 있다.<br/>
-(Stackoverflow 의 기술 질문에서 가져옴)
+
+<div style="text-align: right">(Stackoverflow 의 기술 질문에서 가져옴)</div>
 
 >The basic idea behind reactive programming is that there are certain
 datatypes that represent a value "over time". Computations that
@@ -63,8 +64,10 @@ taken from the outside world): in a GUI situation, the position of
 the mouse would be a good example.
 (from Terminology Question on Stackoverflow)
 
+<div style="border: solid 1px #aaa; padding: 5px">
 참고자료 Mouse is Database.<br/>
 http://huns.me/development/2051#attachment_2068
+</div>
 
 FRP 는 고성능, 동시성, 비동기 명령과 넌 블러킹 IO에 강한 친화력을 가지고 있다. 
 
@@ -78,7 +81,7 @@ Reactive Model 을 사용할때, 각각의 관심사가 호출자에게 투명�
 
 It is certainly the case that such concerns can be naturally handled, often transparently to the caller, when using a Reactive model. 
 
-하지만 이러한 관심사를 효과적 혹은 효율적으로 처리하는 면에서는 전적으로 해당 구현에 달려 있다.(따라서 엄격한 판단이 필요하다).
+하지만 이러한 관심사를 효과적 혹은 효율적으로 처리하는 면에서는 전적으로 해당 구현에 달려 있다. (따라서 엄격한 판단이 필요하다).
 
 But the actual benefit, in terms of handling those concerns effectively or efficiently is entirely up to the implementation in question (and therefore should be subject to a high degree of scrutiny). 
 
@@ -86,8 +89,10 @@ But the actual benefit, in terms of handling those concerns effectively or effic
 
 It is also possible to implement a perfectly sane and useful FRP framework in a synchronous, single-threaded way, but that isn’t really likely to be helpful in trying to use any of the new tools and libraries.
 
-참고 : 리액티브 개발 패러다임에 담긴 메시지
+<div style="border: solid 1px #aaa; padding: 5px">
+참고 : 리액티브 개발 패러다임에 담긴 메시지<br/>
 http://www.zdnet.co.kr/column/column_view.asp?artice_id=20161010104628
+</div>
 
 ## Reactive Use Cases
 

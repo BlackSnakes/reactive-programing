@@ -7,8 +7,6 @@
 
 당신이 만일 학문적 접근법이나, 많은 양의 하스켈 샘플 코드를 찾고 있다면, 인터넷에 더 많은 자료가 있고, 아마 여기에 있진 않을 것 같다.
 
-Reactive Programming is interesting (again) and there is a lot of noise about it at the moment, not all of which is very easy to understand for an outsider and simple enterprise Java developer, such as the author. This article (the first in a series) might help to clarify your understanding of what the fuss is about. The approach is as concrete as possible, and there is no mention of "denotational semantics". If you are looking for a more academic approach and loads of code samples in Haskell, the internet is full of them, but you probably don’t want to be here.
-
 리액티브 프로그래밍은 종종 비동기 프로그래밍, 고성능 프로그래밍과 결합되어 그 개념들과 구분하기 어렵지만 실제로 그것들과는 원칙적으로 완전히 다르다.
 
 이건 필연적으로 혼란을 가져온다.
@@ -19,27 +17,17 @@ Reactive Programming is interesting (again) and there is a lot of noise about it
 
 Enterprise Java 세계에서는 최근 화제가 되었는데, (에를 들어 Reactive Streams initiative 를 봐라) 새롭고 반짝이는 무언가와 그것들이 만들어내는 언제 어디서나 발생된 간단한 실수들이 많았다. (뭔소리여...)
 
-Reactive Programming is often conflated with concurrent programming and high performance to such an extent that it’s hard to separate those concepts, when actually they are in principle completely different. This inevitably leads to confusion. Reactive Programming is also often referred to as or conflated with Functional Reactive Programming, or FRP (and we use the two interchangeably here). Some people think Reactive is nothing new, and it’s what they do all day anyway (mostly they use JavaScript). Others seem to think that it’s a gift from Microsoft (who made a big splash about it when they released some C# extensions a while ago). In the Enterprise Java space there has been something of a buzz recently (e.g. see the Reactive Streams initiative), and as with anything shiny and new, there are a lot of easy mistakes to make out there, about when and where it can and should be used.
-
 ## What Is It?
 
 Reactive Programming 은 개선된 라우팅과 이벤트의 소비를 포함하는 마이크로 아키텍쳐 스타일이고, 전부 행동을 바꾸기 위해 결합된다.
 
 이는 다소 추상적이며, 이것에 대한 다른 많은 정의도 온라인에 있다. 우리는 Reactive 가 의미하는 것이 무엇인지, 또는 다음에 설명할 것이 왜 중요한지에 대해 좀 더 구체적인 개념을 세우려고 한다.
 
-Reactive Programming is a style of micro-architecture involving intelligent routing and consumption of events, all combining to change behaviour. That’s a bit abstract, and so are many of the other definitions you will come across online. We attempt build up some more concrete notions of what it means to be reactive, or why it might be important in what follows.
-
 Reactive Programming 의 기원은 아마 1970년 혹은 더 이르게 거슬러 올라갈 수 있기에 전혀 새로운 아이디어가 아니지만 그것들은 근대적 엔터프라이즈 안에 무언가 공감되는 것이 있다.
-
-The origins of Reactive Programming can probably be traced to the 1970s or even earlier, so there’s nothing new about the idea, but they are really resonating with something in the modern enterprise. 
 
 이 공명은 마이크로서비스의 발생과 같은 시기에 멀티코어 프로세서를 전제하여 발생했다. (우연이 아니다.) 그 이유 중 어떤건 아마 조금 더 확실해질 것이다.
 
-This resonance has arrived (not accidentally) at the same time as the rise of microservices, and the ubiquity of multi-core processors. Some of the reasons for that will hopefully become clear.
-
 여기 유용한 다른 출처에서 거져온 유용한 정의가 있다:
-
-Here are some useful potted definitions from other sources:
 
 > Reactive Programming 뒤의 기본 아이디어는 시간이 지남에 따라 값을 표현하는 데이터 유형이라는 것이다. 이런 시간 경과 변화들을 포함한 Value 의 계산은 시간이 변하는 값을 각자 가진다. (???)
 
@@ -51,51 +39,21 @@ Here are some useful potted definitions from other sources:
 
 (Stackoverflow 의 기술 질문에서 가져옴)
 
-
->The basic idea behind reactive programming is that there are certain
-datatypes that represent a value "over time". Computations that
-involve these changing-over-time values will themselves have values
-that change over time.
-
-and…​
-
->An easy way of reaching a first intuition about what it's like is to
-imagine your program is a spreadsheet and all of your variables are
-cells. 
-<br/>If any of the cells in a spreadsheet change, any cells that
-refer to that cell change as well. It's just the same with FRP. Now
-imagine that some of the cells change on their own (or rather, are
-taken from the outside world): in a GUI situation, the position of
-the mouse would be a good example.
-
-(from Terminology Question on Stackoverflow)
-
-
-참고자료 Mouse is Database.<br/>
+>참고자료 Mouse is Database.<br/>
 http://huns.me/development/2051#attachment_2068
 
 
 FRP 는 고성능, 동시성, 비동기 명령과 넌 블러킹 IO에 강한 친화력을 가지고 있다. 
 
-FRP has a strong affinity with high-performance, concurrency, asynchronous operations and non-blocking IO. 
-
 하지만, FRP 가 그들과 어떠한 관련이 없다는 의심으로 시작하는 것이 도움이 될 것이다.
-
-However, it might be helpful to start with a suspicion that FRP has nothing to do with any of them. 
 
 Reactive Model 을 사용할때, 각각의 관심사가 호출자에게 투명하게 처리하는건 당연한 것이다.
 
-It is certainly the case that such concerns can be naturally handled, often transparently to the caller, when using a Reactive model. 
-
 하지만 이러한 관심사를 효과적 혹은 효율적으로 처리하는 면에서는 전적으로 해당 구현에 달려 있다. (따라서 엄격한 판단이 필요하다).
-
-But the actual benefit, in terms of handling those concerns effectively or efficiently is entirely up to the implementation in question (and therefore should be subject to a high degree of scrutiny). 
 
 또한 동기식으로 싱글 스레드를 사용한 올바르고 유용한 FRP 프레임워크를 구현하는게 가능하지만, 그것은 새로운 도구나 리으버리를 사용려고 하는 데에는 도움이 되지 않는다.
 
-It is also possible to implement a perfectly sane and useful FRP framework in a synchronous, single-threaded way, but that isn’t really likely to be helpful in trying to use any of the new tools and libraries.
-
-참고 : 리액티브 개발 패러다임에 담긴 메시지<br/>
+>참고 : 리액티브 개발 패러다임에 담긴 메시지<br/>
 http://www.zdnet.co.kr/column/column_view.asp?artice_id=20161010104628
 
 ## Reactive Use Cases
